@@ -12,7 +12,7 @@ int main() {
 	int ys, xs;
 	int getched;
 	std::string username = getenv("USER");
-	std::string path = "/home/"+username;
+	std::string path = "/home/"+username+"/";
 	char cpath[100];
 	getmaxyx(stdscr, ys, xs);
 	refresh();
@@ -21,6 +21,8 @@ int main() {
 	while (true) {
 	i = 0;
 	clear();
+	printw(path.c_str());
+	printw("\n\n");
 	for (const auto & entry : fs::directory_iterator(path)){
 	if (i >= strt){
         printw(entry.path().string().c_str());
@@ -38,8 +40,16 @@ int main() {
 	strt++;
 	} else if((char) getched == 'c') {
 		echo();
-		scanw(cpath);
-		path = cpath;
+		getstr(cpath);
+		if(cpath[0]!='/') {
+			path = path + cpath;
+		} else {
+			path=cpath;
+		}
+
+		if(path[path.length()] != '/') {
+			path += '/';
+		}
 		noecho();
 	}
 
