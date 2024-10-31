@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <stdlib.h>
 #include <cstring>
+#include <vector>
 namespace fs = std::filesystem;
 int main() {
 	initscr();
@@ -13,53 +14,96 @@ int main() {
 	int getched;
 	std::string username = getenv("USER");
 	std::string path = "/home/"+username+"/";
-	char cpath[100];
+	char ppath[100];
+	std::string cpath;
 	getmaxyx(stdscr, ys, xs);
 	refresh();
 	int i = 0;
 	int strt =  0;
+	int slcted = 0;
+	bool wtf = false;
+	std::string select = "";
 	while (true) {
 	i = 0;
 	clear();
-	printw(path.c_str());
+	printw(path.c_str()); printw("   "); printw(select.c_str());
 	printw("\n\n");
+
+
+	start_color();			/* Start color 			*/
+	init_pair(1, COLOR_BLACK, COLOR_WHITE);
+
+
+
+
+
+
+
+
+
+
+
+
+
 	for (const auto & entry : fs::directory_iterator(path)){
 	if (i >= strt){
+		if(i == slcted) {
+			attron(COLOR_PAIR(1));}
+		if(i == slcted){
+			select = entry.path().string();
+		}
+		
         printw(entry.path().string().c_str());
+	if(i == slcted) {
+		attroff(COLOR_PAIR(1));
+	}
 	printw("\n");
 	}
 	i++;
-	if(i >= ys + strt) {
+	if(i >= ys + strt-4) {
 	break;
 	}
-	}
-	getched = getch();
+	} if(wtf) {
+	getched = getch(); wtf= false;
+	} else {getched=(int)'u'; wtf=true;}
 	if((char)getched == 'w') {
-		strt--;
+		slcted--;
 	} else if((char) getched == 's') {
-	strt++;
+	slcted++;
 	} else if((char) getched == 'c') {
 		echo();
-		getstr(cpath);
+		getstr(ppath);
+		cpath = ppath;
 		if(cpath[0]!='/') {
-			path = path + cpath;
-		} else {
-			path=cpath;
-		}
-
-		if(path[path.length()] != '/') {
-			path += '/';
-		}
+				path = path+cpath+'/';
+			}
+			
+		 else{
+			path = cpath + '/';		
+			}
 		noecho();
+		while (true){ 
+		if(path[path.rfind('/')-1] == '/') {
+			path.erase(path.rfind('/'), 1);
+		}else{break;}}
+	}
+	
+
+	if(slcted < strt) {
+		slcted++;
+		strt--;
+
 	}
 
-	if(strt < 0) {
-		strt =0;
+	if(slcted < 0) {slcted=0;}
+	else if(slcted > ys - (ys-i)-1) {
+		slcted = ys - (ys-i)-1;
+		strt++;
+	}
+	
 
-	}
-	else if(strt > ys - (ys-i)-1) {
-		strt = ys - (ys-i)-1;
-	}
+
+
 	}
 	endwin();
 }
